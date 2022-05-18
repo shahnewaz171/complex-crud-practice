@@ -46,29 +46,37 @@ const TableInfo = () => {
         }
     };
 
+    // console.log(tableHeads)
+    // console.log(tableRows)
+
     return (
         <>
             <Box sx={{ m: 5 }}>
                 <Typography component="h3" sx={{ fontWeight: 500, fontSize: '26px', textAlign: 'center', mb: 2 }}>Table List</Typography>
                 <Box>
-                    <Grid container spacing={3} className="search-inputs" sx={{ mb: 2 }}>
-                        {[1, 2, 3]?.map(item => {
+                    {/* Search Items */}
+                        {tableHeads?.map((item, index) => {
+                             const { created_at, id, message, name } = item;
+                            console.log(item)
                             return (
-                                <Grid key={item} item xs={6} md={5} lg={3}>
-                                    <Typography variant="p" component="div" className="searchItem-title" >
-                                        Search by name
-                                    </Typography>
-                                    <TextField className="bg-white" onChange={((e) => setSearchValue(e.target.value))} fullWidth sx={{ padding: '1px 1px' }} InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <FiSearch />
-                                            </InputAdornment>
-                                        )
-                                    }} />
+                                <Grid  container spacing={3} className="search-inputs" sx={{ mb: 2 }}>
+                                    <Grid key={item} item xs={6} md={5} lg={3}>
+                                        <Typography variant="p" component="div" className="searchItem-title" >
+                                            Search by name
+                                        </Typography>
+                                        <TextField className="bg-white" onChange={((e) => setSearchValue(e.target.value))} fullWidth sx={{ padding: '1px 1px' }} InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <FiSearch />
+                                                </InputAdornment>
+                                            )
+                                        }} />
+                                    </Grid>
                                 </Grid>
                             )
                         })}
-                    </Grid>
+
+                    {/* Table List */}
                     <TableContainer component={Paper} className="tableList" elevation={0}>
                         <Table sx={{ minWidth: 650 }} aria-label="simple table">
                             <TableHead>
@@ -78,18 +86,50 @@ const TableInfo = () => {
 
                                         return (
                                             <>
-                                                <TableCell onClick={() => handleSorting('id')} align="left" className="pointer">
-                                                    { id.title} {((order === 'asc') && (colValue === 'id')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'id')) ? <TiArrowSortedUp /> : ''}
-                                                </TableCell>
-                                                <TableCell onClick={() => handleSorting('name')} align="left" className="pointer">
-                                                    {name.title} {((order === 'asc') && (colValue === 'name')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'name')) ? <TiArrowSortedUp /> : ''}
-                                                </TableCell>
-                                                <TableCell onClick={() => handleSorting('message')} align="left" className="pointer">
-                                                    {message.title} {((order === 'asc') && (colValue === 'message')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'message')) ? <TiArrowSortedUp /> : ''}
-                                                </TableCell>
-                                                <TableCell onClick={() => handleSorting('created_at')} align="left" className="pointer">
-                                                    {created_at.title} {((order === 'asc') && (colValue === 'created_at')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'created_at')) ? <TiArrowSortedUp /> : ''}
-                                                </TableCell>
+                                                {!id?.hidden ?
+                                                    id?.sortable ?
+                                                    <TableCell onClick={() => handleSorting('id')} align="left" className="pointer">
+                                                        {id.title} {((order === 'asc') && (colValue === 'id')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'id')) ? <TiArrowSortedUp /> : ''}
+                                                    </TableCell> 
+                                                    :
+                                                    <TableCell align="left">
+                                                        {id.title}
+                                                    </TableCell>
+                                                    : ''
+                                                }
+                                                {!name?.hidden ?
+                                                    name?.sortable ?
+                                                    <TableCell onClick={() => handleSorting('name')} align="left" className="pointer">
+                                                        {name.title} {((order === 'asc') && (colValue === 'name')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'name')) ? <TiArrowSortedUp /> : ''}
+                                                    </TableCell> 
+                                                    :
+                                                    <TableCell align="left">
+                                                        {name.title}
+                                                     </TableCell>
+                                                    : ''
+                                                }
+                                                {!message?.hidden ?
+                                                    message?.sortable ?
+                                                    <TableCell onClick={() =>  handleSorting('message')} align="left" className="pointer">
+                                                        {message.title} {((order === 'asc') && (colValue === 'message')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'message')) ? <TiArrowSortedUp /> : ''}
+                                                    </TableCell> 
+                                                    :
+                                                    <TableCell align="left">
+                                                        {message.title}
+                                                    </TableCell> 
+                                                    : ''
+                                                }
+                                                {!created_at?.hidden ?
+                                                    created_at?.sortable ?
+                                                    <TableCell onClick={() => handleSorting('created_at')} align="left" className="pointer">
+                                                        {created_at.title} {((order === 'asc') && (colValue === 'created_at')) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === 'created_at')) ? <TiArrowSortedUp /> : ''}
+                                                    </TableCell>
+                                                    :
+                                                    <TableCell align="left">
+                                                        {created_at.title}
+                                                    </TableCell> 
+                                                     : ''
+                                                }
                                             </>
                                         )
                                     })}
