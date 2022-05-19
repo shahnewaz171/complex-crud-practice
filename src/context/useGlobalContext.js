@@ -1,6 +1,7 @@
 import axios from 'axios';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import SearchInputFields from '../components/TableInfo/SearchInputFields';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { toast } from 'react-toastify';
+import SearchInputFields from '../components/TableInfo/SearchInputFields/SearchInputFields';
 
 const UserContext = createContext();
 
@@ -9,6 +10,7 @@ export const UserProvider = ({ children }) => {
     const [columns, setColumns] = useState([]);
     const [rowsData, setRowsData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const toastId = useRef(null);
 
     const getUsers = async () => {
         setIsLoading(true);
@@ -40,13 +42,32 @@ export const UserProvider = ({ children }) => {
         getUsers();
     }, []);
 
+    const alertMessage = (value, isSuccess) => {
+        toast.dismiss(toastId.current);
+        if(isSuccess){
+            toast.success(value, {
+                theme: "light",
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 5000
+            });
+        }
+        else{
+            toast.error(value, {
+                theme: "light",
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 5000
+            });
+        }
+    }
+
     return (
         <UserContext.Provider
             value={{
                 columns,
                 rowsData,
                 setRowsData,
-                isLoading
+                isLoading,
+                alertMessage
             }}
         >
             {children}

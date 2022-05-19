@@ -1,14 +1,13 @@
-import axios from 'axios';
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import './App.css';
 import GetRoutes from './components/shared/GetRoutes';
 import Navbar from './components/shared/Navbar/Navbar';
 import { UserProvider } from './context/useGlobalContext';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
 
 
 const App = () => {
-  const [tableData, setTableData] = useState([]);
 
   return (
     <BrowserRouter>

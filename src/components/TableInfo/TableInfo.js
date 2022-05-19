@@ -7,9 +7,11 @@ import { useFilters, useSortBy, useTable } from 'react-table/dist/react-table.de
 import './TableInfo.css';
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { ToastContainer } from 'react-toastify';
+import axios from 'axios';
 
 const TableInfo = () => {
-    const { columns, rowsData, isLoading, setRowsData } = useGlobalContext();
+    const { columns, rowsData, isLoading, setRowsData, alertMessage } = useGlobalContext();
     const data = rowsData;
     const navigate = useNavigate();
 
@@ -18,6 +20,18 @@ const TableInfo = () => {
         const [movedRow] = newData.splice(startIndex, 1);
         newData.splice(endIndex, 0, movedRow);
         setRowsData(newData);
+
+        axios.post('http://localhost/api/reorder.php')
+            .then(res => {
+                const { messages, status } = res.data;
+                status === 'success' ?
+                    alertMessage(messages?.join(', '), true)
+                    :    
+                    alertMessage(messages?.join(', '), false);
+            })
+            .catch((err) => {
+                alertMessage('Something went wrong! Please try again later.', false);
+            })
     };
 
     const handleDragEnd = (result) => {
@@ -99,11 +113,11 @@ const TableInfo = () => {
                                                 prepareRow(row);
 
                                                 return (
-                                                    <Draggable 
-                                                        draggableId={row.original?.id.toString()} 
+                                                    <Draggable
+                                                        draggableId={row.original?.id.toString()}
                                                         key={row.original.id}
                                                         index={row.index}
-                                                        >
+                                                    >
                                                         {(provided, snapshot) => (
                                                             < TableRow
                                                                 {...row.getRowProps()}
@@ -139,6 +153,7 @@ const TableInfo = () => {
                     </TableContainer>
                 </Box>
             </Box>
+            <ToastContainer />
         </>
     );
 };
