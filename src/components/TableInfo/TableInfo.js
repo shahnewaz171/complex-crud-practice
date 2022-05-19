@@ -4,11 +4,11 @@ import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import useGlobalContext from '../../context/useGlobalContext';
 import { useFilters, useSortBy, useTable } from 'react-table/dist/react-table.development';
-import './TableInfo.css';
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { ToastContainer } from 'react-toastify';
 import axios from 'axios';
+import './TableInfo.css';
 
 const TableInfo = () => {
     const { columns, rowsData, isLoading, setRowsData, alertMessage } = useGlobalContext();

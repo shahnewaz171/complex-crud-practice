@@ -1,0 +1,17 @@
+.MuiOutlinedInput-input, 
+.formInfo .MuiSelect-select, 
+.formInfo .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input, 
+.formInfo input, 
+.formInfo select{
+    padding: 5px 10px !important;
+}
+.formInfo .input-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.formInfo .input-item .searchItem-title{
+    font-weight: 500;
+    width: 20%;
+}
