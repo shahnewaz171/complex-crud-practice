@@ -12,12 +12,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <UserProvider
-        value={{
-          tableData,
-          setTableData
-        }}
-      >
+      <UserProvider>
         <Navbar />
         <GetRoutes />
       </UserProvider>

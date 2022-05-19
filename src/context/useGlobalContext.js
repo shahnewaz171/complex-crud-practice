@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import SearchInputFields from '../components/TableInfo/SearchInputFields';
 
 const UserContext = createContext();
 
@@ -21,11 +22,8 @@ export const UserProvider = ({ children }) => {
                 let headersInfo = result.headers[0];
 
                 for (let key in headersInfo) {
-                    if (!headersInfo[key].hidden) {
-                        const data = { ...headersInfo[key], accessor: key };
-                        console.log(data)
-                        colInfo.push(data);
-                    }
+                    const data = { ...headersInfo[key], accessor: key, Filter: SearchInputFields };
+                    colInfo.push(data);
                 }
                 setRowsData(result.rows);
             }

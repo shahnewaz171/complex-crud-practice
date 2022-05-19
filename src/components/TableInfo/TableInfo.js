@@ -1,22 +1,21 @@
 /* eslint-disable array-callback-return */
-import { Box, Grid, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
-import { FiSearch } from "react-icons/fi";
-import './TableInfo.css';
-import { GlobalContext } from '../../App';
 import useGlobalContext from '../../context/useGlobalContext';
-import { useSortBy, useTable } from 'react-table/dist/react-table.development';
+import { useFilters, useSortBy, useTable } from 'react-table/dist/react-table.development';
+import './TableInfo.css';
+import { useNavigate } from 'react-router-dom';
 
 const TableInfo = () => {
     const { columns, rowsData, isLoading, setRowsData } = useGlobalContext();
-    const [searchValue, setSearchValue] = useState('');
     const data = rowsData;
+    const navigate = useNavigate();
 
     const tableInstance = useTable({
         columns,
         data
-    }, useSortBy);
+    }, useFilters, useSortBy);
 
     const {
         getTableProps,
@@ -31,42 +30,39 @@ const TableInfo = () => {
             <Box sx={{ m: 5 }}>
                 <Typography component="h3" sx={{ fontWeight: 500, fontSize: '26px', textAlign: 'center', mb: 2 }}>Table List</Typography>
                 <Box>
-                    {/* Search Items */}
-                    <Grid container spacing={3} className="search-inputs" sx={{ mb: 2 }}>
-                        <Grid item xs={6} md={5} lg={3}>
-                            <Typography variant="p" component="div" className="searchItem-title" >
-                                Search by name
-                            </Typography>
-                            <TextField className="bg-white" onChange={((e) => setSearchValue(e.target.value))} fullWidth sx={{ padding: '1px 1px' }} InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <FiSearch />
-                                    </InputAdornment>
-                                )
-                            }} />
-                        </Grid>
-                    </Grid>
-
                     {/* Table List */}
                     <TableContainer {...getTableProps()} component={Paper} className="tableList" elevation={0}>
                         <Table sx={{ minWidth: 650 }} aria-label="simple table">
                             <TableHead>
                                 {headerGroups.map((headerGroup) => (
-                                    <TableRow {...headerGroup.getHeaderGroupProps()} align="left">
+                                    <TableRow {...headerGroup.getHeaderGroupProps()} align="center">
                                         {headerGroup.headers.map(col => {
-                                            const { sortable, hidden } = col;
-                                            console.log(col)
+                                            const { sortable, hidden, searchable } = col;
+                                            // console.log(col)
+
                                             if (!hidden) {
                                                 return (
                                                     sortable ?
-                                                        <TableCell {...col.getHeaderProps(col.getSortByToggleProps())} align="left">
-                                                            {col.render("title")}
-                                                            {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                        <TableCell {...col.getHeaderProps(col.getSortByToggleProps())} align="center">
+                                                            <Box>
+                                                                {col.render("title")}
+                                                                <Typography component="span">
+                                                                    {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box>
+                                                                {col.canFilter ? col.render("Filter") : null}
+                                                            </Box>
                                                         </TableCell>
                                                         :
-                                                        <TableCell {...col.getHeaderProps()} align="left">
-                                                            {col.render("title")}
-                                                            {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                        <TableCell {...col.getHeaderProps()} align="center">
+                                                            <Box>
+                                                                {col.render("title")}
+                                                                {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                            </Box>
+                                                            <Box>
+                                                                {col.canFilter ? col.render("Filter") : null}
+                                                            </Box>
                                                         </TableCell>
                                                 )
                                             }
@@ -80,8 +76,16 @@ const TableInfo = () => {
                                     return (
                                         < TableRow {...row.getRowProps()}>
                                             {row.cells?.map((cell) => {
+                                                const { column, row } = cell;
+                                                console.log(cell)
                                                 return (
-                                                    <TableCell {...cell.getCellProps()} align="left">{cell.render("Cell")}</TableCell>
+                                                    <TableCell {...cell.getCellProps()} align="center">
+                                                        {column.id === 'id' ?
+                                                            (<Typography onClick={() => navigate(`create_data/${row.original?.id}`)} component="span" sx={{ color: 'green', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
+                                                            :
+                                                            (cell.render("Cell"))
+                                                        }
+                                                    </TableCell>
                                                 )
                                             })}
                                         </TableRow>
