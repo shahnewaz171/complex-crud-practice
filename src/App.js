@@ -1,26 +1,26 @@
 import axios from 'axios';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import './App.css';
 import GetRoutes from './components/shared/GetRoutes';
 import Navbar from './components/shared/Navbar/Navbar';
+import { UserProvider } from './context/useGlobalContext';
 
-export const GlobalContext = createContext();
 
 const App = () => {
   const [tableData, setTableData] = useState([]);
- 
+
   return (
     <BrowserRouter>
-      <GlobalContext.Provider
-        value={{ 
+      <UserProvider
+        value={{
           tableData,
           setTableData
-         }}
+        }}
       >
         <Navbar />
         <GetRoutes />
-      </GlobalContext.Provider>
+      </UserProvider>
     </BrowserRouter>
   );
 }
