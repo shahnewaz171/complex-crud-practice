@@ -21,12 +21,20 @@
     border-top: 1px solid rgba(224, 224, 224, 1);
 }
 
-.tableList table thead tr th:first-child {
+.tableList table thead tr th:first-child,
+.tableList table tbody tr td:first-child,
+.tableList table tbody tr th:first-child {
     border-left: 1px solid rgba(224, 224, 224, 1);
 }
 
 .tableList table tbody tr th {
     border-left: 1px solid rgba(224, 224, 224, 1);
+}
+.tableList table tbody tr{
+    cursor: grab;
+}
+.tableList table tbody tr:hover{
+    background-color: #182f591f!important;
 }
 
 .col-title {
@@ -44,3 +52,7 @@
 .tableList .MuiOutlinedInput-input{
     padding: 5px 5px;
 }
+.draggable {
+    top: auto !important;
+    left: auto !important;
+  }

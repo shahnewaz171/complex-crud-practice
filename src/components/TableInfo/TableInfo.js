@@ -6,15 +6,31 @@ import useGlobalContext from '../../context/useGlobalContext';
 import { useFilters, useSortBy, useTable } from 'react-table/dist/react-table.development';
 import './TableInfo.css';
 import { useNavigate } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const TableInfo = () => {
     const { columns, rowsData, isLoading, setRowsData } = useGlobalContext();
     const data = rowsData;
     const navigate = useNavigate();
 
+    const reorderData = (startIndex, endIndex) => {
+        const newData = [...data];
+        const [movedRow] = newData.splice(startIndex, 1);
+        newData.splice(endIndex, 0, movedRow);
+        setRowsData(newData);
+    };
+
+    const handleDragEnd = (result) => {
+        const { source, destination } = result;
+        if (!destination) return;
+        reorderData(source.index, destination.index);
+    }
+
+
     const tableInstance = useTable({
         columns,
-        data
+        data,
+        reorderData
     }, useFilters, useSortBy);
 
     const {
@@ -75,28 +91,50 @@ const TableInfo = () => {
                                     </TableRow>
                                 ))}
                             </TableHead>
-                            <TableBody {...getTableBodyProps()}>
-                                {rows?.map((row, index) => {
-                                    prepareRow(row);
-                                    return (
-                                        < TableRow {...row.getRowProps()}>
-                                            {row.cells?.map((cell) => {
-                                                const { column, row } = cell;
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                                <Droppable droppableId="table-body">
+                                    {(provided, snapshot) => (
+                                        <TableBody  {...getTableBodyProps()} ref={provided.innerRef} {...provided.droppableProps} >
+                                            {rows?.map((row) => {
+                                                prepareRow(row);
 
                                                 return (
-                                                    <TableCell {...cell.getCellProps()} align="center">
-                                                        {column.id === 'id' ?
-                                                            (<Typography onClick={() => navigate(`create_data/${row.original?.id}`)} component="span" sx={{ color: '#0969da', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
-                                                            :
-                                                            (cell.render("Cell"))
-                                                        }
-                                                    </TableCell>
+                                                    <Draggable 
+                                                        draggableId={row.original?.id.toString()} 
+                                                        key={row.original.id}
+                                                        index={row.index}
+                                                        >
+                                                        {(provided, snapshot) => (
+                                                            < TableRow
+                                                                {...row.getRowProps()}
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                sx={{ backgroundColor: snapshot.isDragging ? "#182f591f" : '' }}
+                                                            >
+                                                                {row.cells?.map((cell) => {
+                                                                    const { column, row } = cell;
+
+                                                                    return (
+                                                                        <TableCell {...cell.getCellProps()} align="center">
+                                                                            {column.id === 'id' ?
+                                                                                (<Typography onClick={() => navigate(`create_data/${row.original?.id}`)} component="span" sx={{ color: '#0969da', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
+                                                                                :
+                                                                                (cell.render("Cell"))
+                                                                            }
+                                                                        </TableCell>
+                                                                    )
+                                                                })}
+                                                            </TableRow>
+                                                        )}
+                                                    </Draggable>
                                                 )
                                             })}
-                                        </TableRow>
-                                    )
-                                })}
-                            </TableBody>
+                                            {provided.placeholder}
+                                        </TableBody>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         </Table>
                     </TableContainer>
                 </Box>
