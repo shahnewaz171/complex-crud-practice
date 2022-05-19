@@ -6,7 +6,7 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [columns, setColumns] = useState([]);
-    const [rows, setRows] = useState([]);
+    const [rowsData, setRowsData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const getUsers = async () => {
@@ -22,12 +22,12 @@ export const UserProvider = ({ children }) => {
 
                 for (let key in headersInfo) {
                     if (!headersInfo[key].hidden) {
-                        const data = headersInfo[key];
+                        const data = { ...headersInfo[key], accessor: key };
+                        console.log(data)
                         colInfo.push(data);
                     }
                 }
-
-                setRows(result.rows);
+                setRowsData(result.rows);
             }
         }
         catch (e) {
@@ -46,8 +46,8 @@ export const UserProvider = ({ children }) => {
         <UserContext.Provider
             value={{
                 columns,
-                rows,
-                setRows,
+                rowsData,
+                setRowsData,
                 isLoading
             }}
         >

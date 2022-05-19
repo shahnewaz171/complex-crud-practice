@@ -1,38 +1,30 @@
+/* eslint-disable array-callback-return */
 import { Box, Grid, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import { FiSearch } from "react-icons/fi";
 import './TableInfo.css';
 import { GlobalContext } from '../../App';
 import useGlobalContext from '../../context/useGlobalContext';
+import { useSortBy, useTable } from 'react-table/dist/react-table.development';
 
 const TableInfo = () => {
-    const { columns, rows, isLoading, setRows } = useGlobalContext();
-    const [order, setOrder] = useState('');
-    const [colValue, setColValue] = useState('');
+    const { columns, rowsData, isLoading, setRowsData } = useGlobalContext();
     const [searchValue, setSearchValue] = useState('');
+    const data = rowsData;
 
-    const handleSorting = (col, index) => {
-        setColValue(index);
-        console.log(col)
+    const tableInstance = useTable({
+        columns,
+        data
+    }, useSortBy);
 
-        if (order === 'asc' || order === '') {
-            const sorted = [...rows].sort((a, b) =>
-                a[col] > b[col] ? 1 : -1
-            );
-            setRows(sorted);
-            setOrder('dsc');
-        }
-        else if (order === 'dsc') {
-            const sorted = [...rows].sort((a, b) =>
-                a[col] < b[col] ? 1 : -1
-            );
-            setRows(sorted)
-            setOrder('asc');
-        }
-    };
-
-    // console.log(columns)
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        rows,
+        prepareRow,
+    } = tableInstance;
 
     return (
         <>
@@ -56,48 +48,45 @@ const TableInfo = () => {
                     </Grid>
 
                     {/* Table List */}
-                    <TableContainer component={Paper} className="tableList" elevation={0}>
+                    <TableContainer {...getTableProps()} component={Paper} className="tableList" elevation={0}>
                         <Table sx={{ minWidth: 650 }} aria-label="simple table">
                             <TableHead>
-                                <TableRow>
-                                    {columns?.map((item, index) => {
-                                        const { title, sortable } = item;
-                                        const uniqueID = index + 1;
-
-                                        const joinTitle = title.replace(/ /g, "").trim();
-                                        // console.log(joinTitle);
-
-                                        if (sortable) {
-                                            return (
-                                                <TableCell key={uniqueID} onClick={() => handleSorting('submisiondate', index)} align="left" className="pointer">
-                                                    {title} {((order === 'asc') && (colValue === index)) ? <TiArrowSortedDown /> : ((order === 'dsc') && (colValue === index)) ? <TiArrowSortedUp /> : ''}
-                                                </TableCell>
-                                            )
-                                        }
-                                        else {
-                                            return (
-                                                <TableCell key={uniqueID} align="left">
-                                                    {title}
-                                                </TableCell>
-                                            )
-                                        }
-
-                                    })}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows?.map((row, index) => (
-                                    <TableRow
-                                        key={index + 1}
-                                    >
-                                        <TableCell component="th" scope="row">
-                                            {row?.id}
-                                        </TableCell>
-                                        <TableCell align="left">{row?.name}</TableCell>
-                                        <TableCell align="left">{row?.message}</TableCell>
-                                        <TableCell align="left">{row?.created_at}</TableCell>
+                                {headerGroups.map((headerGroup) => (
+                                    <TableRow {...headerGroup.getHeaderGroupProps()} align="left">
+                                        {headerGroup.headers.map(col => {
+                                            const { sortable, hidden } = col;
+                                            console.log(col)
+                                            if (!hidden) {
+                                                return (
+                                                    sortable ?
+                                                        <TableCell {...col.getHeaderProps(col.getSortByToggleProps())} align="left">
+                                                            {col.render("title")}
+                                                            {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                        </TableCell>
+                                                        :
+                                                        <TableCell {...col.getHeaderProps()} align="left">
+                                                            {col.render("title")}
+                                                            {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                        </TableCell>
+                                                )
+                                            }
+                                        })}
                                     </TableRow>
                                 ))}
+                            </TableHead>
+                            <TableBody {...getTableBodyProps()}>
+                                {rows?.map((row, index) => {
+                                    prepareRow(row);
+                                    return (
+                                        < TableRow {...row.getRowProps()}>
+                                            {row.cells?.map((cell) => {
+                                                return (
+                                                    <TableCell {...cell.getCellProps()} align="left">{cell.render("Cell")}</TableCell>
+                                                )
+                                            })}
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>
