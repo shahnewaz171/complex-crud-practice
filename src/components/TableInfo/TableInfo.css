@@ -28,3 +28,15 @@
 .tableList table tbody tr th {
     border-left: 1px solid rgba(224, 224, 224, 1);
 }
+
+.col-title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.tableList .col-title span {
+    height: 40px;
+    width: 40px;
+    color: #fff;
+    background: #226697;
+}

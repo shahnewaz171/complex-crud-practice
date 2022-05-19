@@ -38,31 +38,34 @@ const TableInfo = () => {
                                     <TableRow {...headerGroup.getHeaderGroupProps()} align="center">
                                         {headerGroup.headers.map(col => {
                                             const { sortable, hidden, searchable } = col;
-                                            // console.log(col)
 
                                             if (!hidden) {
                                                 return (
                                                     sortable ?
                                                         <TableCell {...col.getHeaderProps(col.getSortByToggleProps())} align="center">
-                                                            <Box>
+                                                            <Box className="col-title">
                                                                 {col.render("title")}
                                                                 <Typography component="span">
                                                                     {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
                                                                 </Typography>
                                                             </Box>
-                                                            <Box>
-                                                                {col.canFilter ? col.render("Filter") : null}
-                                                            </Box>
+                                                            {searchable ?
+                                                                <Box>
+                                                                    {col.canFilter ? col.render("Filter") : null}
+                                                                </Box> : ''
+                                                            }
                                                         </TableCell>
                                                         :
                                                         <TableCell {...col.getHeaderProps()} align="center">
-                                                            <Box>
+                                                            <Box className="col-title">
                                                                 {col.render("title")}
                                                                 {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
                                                             </Box>
-                                                            <Box>
-                                                                {col.canFilter ? col.render("Filter") : null}
-                                                            </Box>
+                                                            {searchable ?
+                                                                <Box>
+                                                                    {col.canFilter ? col.render("Filter") : null}
+                                                                </Box> : ''
+                                                            }
                                                         </TableCell>
                                                 )
                                             }
@@ -77,7 +80,7 @@ const TableInfo = () => {
                                         < TableRow {...row.getRowProps()}>
                                             {row.cells?.map((cell) => {
                                                 const { column, row } = cell;
-                                                console.log(cell)
+
                                                 return (
                                                     <TableCell {...cell.getCellProps()} align="center">
                                                         {column.id === 'id' ?
