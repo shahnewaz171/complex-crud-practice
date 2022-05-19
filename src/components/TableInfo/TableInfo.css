@@ -34,9 +34,13 @@
     font-weight: 600;
 }
 
-.tableList .col-title span {
-    height: 40px;
-    width: 40px;
+.tableList .col-title .arrow-icons svg{
+    height: 15px;
+    width: 18px;
     color: #fff;
     background: #226697;
+    display: inline-block;
+}
+.tableList .MuiOutlinedInput-input{
+    padding: 5px 5px;
 }

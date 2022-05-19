@@ -8,7 +8,7 @@ const SearchInputFields = ({ column }) => {
 
     return (
         <Box>
-            <TextField className="bg-white" value={filterValue || ''} onChange={((e) => setFilter(e.target.value))} fullWidth InputProps={{
+            <TextField className="bg-white" value={filterValue || ''} onChange={((e) => setFilter(e.target.value))} sx={{ width: '80%' }} InputProps={{
                 endAdornment: (
                     <InputAdornment position="end">
                         <FiSearch />

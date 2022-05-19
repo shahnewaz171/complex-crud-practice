@@ -28,7 +28,7 @@ const TableInfo = () => {
     return (
         <>
             <Box sx={{ m: 5 }}>
-                <Typography component="h3" sx={{ fontWeight: 500, fontSize: '26px', textAlign: 'center', mb: 2 }}>Table List</Typography>
+                <Typography component="h3" sx={{ fontWeight: 500, fontSize: '26px', textAlign: 'center', mb: 4 }}>Table List</Typography>
                 <Box>
                     {/* Table List */}
                     <TableContainer {...getTableProps()} component={Paper} className="tableList" elevation={0}>
@@ -44,9 +44,12 @@ const TableInfo = () => {
                                                     sortable ?
                                                         <TableCell {...col.getHeaderProps(col.getSortByToggleProps())} align="center">
                                                             <Box className="col-title">
-                                                                {col.render("title")}
-                                                                <Typography component="span">
-                                                                    {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
+                                                                <Typography component="span" sx={{ fontSize: '18px', fontWeight: 500 }}>
+                                                                    {col.render("title")}
+                                                                </Typography>
+                                                                <Typography component="span" className="arrow-icons" sx={{ ml: 1, mt: '5px' }}>
+                                                                    {col.isSorted ?
+                                                                        (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
                                                                 </Typography>
                                                             </Box>
                                                             {searchable ?
@@ -57,10 +60,9 @@ const TableInfo = () => {
                                                         </TableCell>
                                                         :
                                                         <TableCell {...col.getHeaderProps()} align="center">
-                                                            <Box className="col-title">
+                                                            <Typography component="span" sx={{ fontSize: '18px', fontWeight: 500 }}>
                                                                 {col.render("title")}
-                                                                {col.isSorted ? (col.isSortedDesc ? <TiArrowSortedDown /> : <TiArrowSortedUp />) : ''}
-                                                            </Box>
+                                                            </Typography>
                                                             {searchable ?
                                                                 <Box>
                                                                     {col.canFilter ? col.render("Filter") : null}
@@ -84,7 +86,7 @@ const TableInfo = () => {
                                                 return (
                                                     <TableCell {...cell.getCellProps()} align="center">
                                                         {column.id === 'id' ?
-                                                            (<Typography onClick={() => navigate(`create_data/${row.original?.id}`)} component="span" sx={{ color: 'green', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
+                                                            (<Typography onClick={() => navigate(`create_data/${row.original?.id}`)} component="span" sx={{ color: '#0969da', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
                                                             :
                                                             (cell.render("Cell"))
                                                         }
