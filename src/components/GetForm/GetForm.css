@@ -1,17 +1,39 @@
-.MuiOutlinedInput-input, 
-.formInfo .MuiSelect-select, 
-.formInfo .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input, 
-.formInfo input, 
-.formInfo select{
+.MuiOutlinedInput-input,
+.formInfo .MuiSelect-select,
+.formInfo .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input,
+.formInfo input,
+.formInfo select {
     padding: 5px 10px !important;
 }
-.formInfo .input-item{
+
+.formInfo .input-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: top;
     margin-bottom: 20px;
 }
-.formInfo .input-item .searchItem-title{
+
+.formInfo .input-item .searchItem-title {
     font-weight: 500;
-    width: 20%;
+    /* width: 20%; */
+}
+
+.formInfo .input-item .MuiRadio-root {
+    padding: 9px 4px 9px 0px;
+}
+
+.formInfo .input-item .work-inputs {
+    display: flex;
+    align-items: end;
+    width: 100%;
+    justify-content: space-between;
+    padding-left: 22px;
+}
+
+.formInfo .addMore {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* height: 92%; */
+    /* width: 30%; */
 }
