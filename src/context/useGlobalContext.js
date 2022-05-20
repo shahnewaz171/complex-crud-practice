@@ -66,7 +66,7 @@ export const UserProvider = ({ children }) => {
             <ErrorMessage
                 errors={errors}
                 name={`${inputName}`}
-                render={({ message }) => <p style={{ margin: 0, fontSize: "14px", color: "#d32f2f", whiteSpace: 'nowrap' }}>{message}</p>}
+                render={({ message }) =><p style={{ margin: 0, fontSize: "14px", color: "#d32f2f", whiteSpace: 'nowrap' }}>{message}</p>}
             />
         )
     }

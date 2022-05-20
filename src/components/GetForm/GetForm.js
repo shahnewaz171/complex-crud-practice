@@ -16,7 +16,6 @@ const GetForm = () => {
         mode: "all",
         reValidateMode: 'onChange'
     });
-    const editorRefDetails = useRef(null);
 
     useEffect(() => {
         axios.post('http://localhost/api/get_form.php')
@@ -45,10 +44,6 @@ const GetForm = () => {
     }
     // console.log(rows)
 
-    const handleChange = (event) => {
-        setValue(event.target.value);
-    };
-
     const onSubmit = (data) => {
         console.log(data);
     }
@@ -65,9 +60,13 @@ const GetForm = () => {
                     const { ...html_attr } = item.html_attr;
                     const inputName = fieldNames[index];
                     delete html_attr.class;
-                    // console.log(Object.values(repeater_fields))
-                    // console.log(fieldNames[index]);
-                    // console.log(item)
+
+                    const patterns = validate?.split("|");
+                    const patternType = patterns?.filter((item) => !item.includes(":"));
+                    const lengthSize = patterns?.filter((item) => item.includes(":"));
+                    console.log(patternType?.[0]);
+                    console.log(lengthSize?.[0]?.split(':'));
+
                     return (
                         <Box key={index + 1}>
                             {type !== 'hidden' ?
@@ -88,10 +87,9 @@ const GetForm = () => {
                                                         })}
                                                     </Select>
                                                 )}
-                                                name={item?.default}
                                                 control={control}
                                                 defaultValue={item?.default || ''}
-                                                {...register(`${inputName}`, { required: "This is required." })}
+                                                {...register(`${inputName}`,  required ?{ required: 'This field is required' } : '')}
                                             />
                                             <ErrorMessages
                                                 errors={errors}
@@ -101,8 +99,10 @@ const GetForm = () => {
                                         :
                                         type === 'textarea' ?
                                             <Box sx={{ width: '100%' }}>
-                                                <TextField multiline rows={2} className={item.html_attr?.class} {...html_attr} fullWidth {...register(`${fieldNames[index]}`, { required: "This field is required" })} defaultValue={item?.default || ''} />
-                                                <ErrorMessages errors={errors} inputName={`${fieldNames[index]}`} />
+                                                <TextField {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`,  required ?{ required: 'This field is required' } : '')} defaultValue={item?.default || ''} />
+                                                {required &&
+                                                     <ErrorMessages errors={errors} inputName={`${inputName}`} />
+                                                }
                                             </Box>
                                             :
                                             type === "radio" ?
@@ -116,7 +116,7 @@ const GetForm = () => {
                                                         )}
                                                         control={control}
                                                         defaultValue={item?.default || ''}
-                                                        {...register(`${inputName}`, { required: "This is required." })}
+                                                        {...register(`${inputName}`,  required ?{ required: 'This field is required' } : '')}
                                                     />
                                                     <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                 </FormControl>
@@ -133,7 +133,7 @@ const GetForm = () => {
                                                                                 Work {num}
                                                                             </Typography>
                                                                             {Object.values(repeater_fields)?.map((field, i) => {
-                                                                                const { title, required, validate } = field;
+                                                                                const { title, required: workReq, validate } = field;
                                                                                 const keyValue = Object.keys(repeater_fields);
 
                                                                                 return (
@@ -141,7 +141,7 @@ const GetForm = () => {
                                                                                         <Typography component="p" sx={{ fontSize: '14px', color: '#000' }}>
                                                                                             {title}:
                                                                                         </Typography>
-                                                                                        <TextField fullWidth type={field?.type} {...register(`fields.${inx}.${keyValue[i]}`, { required: "This field is required" })} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
+                                                                                        <TextField fullWidth type={field?.type} {...register(`fields.${inx}.${keyValue[i]}`,  workReq ?{ required: 'This field is required' } : '')} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
                                                                                         <ErrorMessages errors={errors}
                                                                                             inputName={`fields.${inx}.${keyValue[i]}`} />
                                                                                     </Box>
@@ -163,8 +163,15 @@ const GetForm = () => {
                                                     </Box>
                                                     :
                                                     <Box sx={{ width: '100%' }}>
-                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`, { required: "This field is required" })} defaultValue={item?.default || ''} />
-                                                        <ErrorMessages errors={errors}  inputName={`${inputName}`} />
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth 
+                                                        {...register(`${inputName}`, required ?{ required: 'This field is required' } : patternType == 'only_letters'  ? { pattern: { 
+                                                            value: /^[A-Za-z]+$/ ,
+                                                            message: 'Please input alphabet characters only'
+                                                         }} : patternType == 'only_letter_number'  ? { pattern: { 
+                                                            value: /[^A-Za-z0-9]+/ ,
+                                                            message: 'Please input characters or numbers only'
+                                                         }} : '')} defaultValue={item?.default || ''} />
+                                                        <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                     </Box>
                                     }
                                 </Box> : ''
