@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Button, FormControl, FormControlLabel, FormHelperText, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
-import { Controller, useForm } from 'react-hook-form';
-import { Editor } from "@tinymce/tinymce-react";
+import { Box, Button, FormControl, FormControlLabel, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import useGlobalContext from '../../context/useGlobalContext';
 import axios from 'axios';
 import './GetForm.css';
 
 const GetForm = () => {
+    const { ErrorMessages } = useGlobalContext();
     const [fieldInfo, setFieldInfo] = useState([]);
     const [fieldNames, setFieldNames] = useState([]);
     const [disable, setDisable] = useState(false);
     const [value, setValue] = React.useState('false');
+    const [numberOfWork, setNumberOfWork] = useState(1);
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm({
         mode: "all",
         reValidateMode: 'onChange'
@@ -25,14 +27,23 @@ const GetForm = () => {
                     setFieldInfo(fieldsInfo);
                     const fieldName = Object.keys(data.fields[0]);
                     setFieldNames(fieldName);
-                    console.log()
-
                 }
             })
             .catch((err) => {
                 console.error(err);
             })
-    }, [])
+    }, []);
+
+    useFieldArray({
+        control,
+        name: "fields",
+    });
+
+    let rows = [];
+    for (let i = 1; i <= numberOfWork; i++) {
+        rows.push(i);
+    }
+    // console.log(rows)
 
     const handleChange = (event) => {
         setValue(event.target.value);
@@ -50,10 +61,13 @@ const GetForm = () => {
                     Get Form
                 </Typography>
                 {fieldInfo?.map((item, index) => {
-                    const { title, type, required, value, validate, html_attr, options, repeater_fields } = item;
+                    const { title, type, required, value, validate, options, repeater_fields } = item;
+                    const { ...html_attr } = item.html_attr;
+                    const inputName = fieldNames[index];
+                    delete html_attr.class;
                     // console.log(Object.values(repeater_fields))
-                    // console.log(item);
-                    console.log(fieldNames[index])
+                    // console.log(fieldNames[index]);
+                    // console.log(item)
                     return (
                         <Box key={index + 1}>
                             {type !== 'hidden' ?
@@ -62,57 +76,74 @@ const GetForm = () => {
                                         {title}:
                                     </Typography>
                                     {type === 'select' ?
-                                        <FormControl fullWidth error={Boolean(errors.user_gender)} >
+                                        <FormControl fullWidth>
                                             <Controller
                                                 render={({ field }) => (
-                                                    <Select {...field} >
-                                                        <MenuItem value={''}>Select Gender</MenuItem>
-                                                        <MenuItem value={'male'}>Male</MenuItem>
-                                                        <MenuItem value={'female'}>Female</MenuItem>
-                                                        <MenuItem value={'other'}>None</MenuItem>
+                                                    <Select {...field} {...html_attr} className={item.html_attr?.class} >
+                                                        {options?.map((option, i) => {
+                                                            const { key, label } = option;
+                                                            return (
+                                                                <MenuItem key={i + 1} value={key}>{label}</MenuItem>
+                                                            )
+                                                        })}
                                                     </Select>
                                                 )}
-                                                name={fieldNames[index]}
+                                                name={item?.default}
                                                 control={control}
-                                                defaultValue=''
-                                                rules={{
-                                                    required: "This field is required"
-                                                }}
+                                                defaultValue={item?.default || ''}
+                                                {...register(`${inputName}`, { required: "This is required." })}
                                             />
-                                            <FormHelperText>{errors.user_gender?.message}</FormHelperText>
+                                            <ErrorMessages
+                                                errors={errors}
+                                                inputName={`${inputName}`}
+                                            />
                                         </FormControl>
                                         :
                                         type === 'textarea' ?
-                                            <TextField multiline rows={2} fullWidth {...register(fieldNames[index], { required: "This field is required" })} error={Boolean(errors.user_name)} helperText={errors.user_name?.message} />
+                                            <Box sx={{ width: '100%' }}>
+                                                <TextField multiline rows={2} className={item.html_attr?.class} {...html_attr} fullWidth {...register(`${fieldNames[index]}`, { required: "This field is required" })} defaultValue={item?.default || ''} />
+                                                <ErrorMessages errors={errors} inputName={`${fieldNames[index]}`} />
+                                            </Box>
                                             :
                                             type === "radio" ?
-                                                <RadioGroup
-                                                    row
-                                                    aria-labelledby="demo-controlled-radio-buttons-group"
-                                                    name={fieldNames[index]}
-                                                    sx={{ pt: .2 }}
-                                                >
-                                                    <FormControlLabel value="true" control={<Radio />} label="Yes" sx={{ textTransform: 'none', ml: '0px' }} />
-                                                    <FormControlLabel value="false" control={<Radio />} label="No" sx={{ textTransform: 'none', ml: '0px' }} />
-                                                </RadioGroup>
+                                                <FormControl sx={{ pt: .2 }}>
+                                                    <Controller
+                                                        render={({ field }) => (
+                                                            <RadioGroup row {...field} >
+                                                                <FormControlLabel value="true" control={<Radio />} label="Yes" sx={{ textTransform: 'none', ml: '0px' }} />
+                                                                <FormControlLabel value="false" control={<Radio />} label="No" sx={{ textTransform: 'none', ml: '0px' }} />
+                                                            </RadioGroup>
+                                                        )}
+                                                        control={control}
+                                                        defaultValue={item?.default || ''}
+                                                        {...register(`${inputName}`, { required: "This is required." })}
+                                                    />
+                                                    <ErrorMessages errors={errors} inputName={`${inputName}`} />
+                                                </FormControl>
                                                 :
                                                 type === 'repeater' ?
                                                     <Box className="work-inputs">
                                                         <Grid container spacing={3}>
-                                                            {[1]?.map(item => {
+                                                            {rows?.map((num, inx) => {
+
                                                                 return (
-                                                                    <Grid key={item} item xs={4}>
-                                                                        <Box sx={{ border: '1px solid #707070', padding: '8px', height: '170px' }}>
+                                                                    <Grid key={inx + 1} item xs={4}>
+                                                                        <Box sx={{ border: '1px solid #707070', padding: '15px', minHeight: '180px' }}>
                                                                             <Typography component="p" className="searchItem-title" sx={{ mb: 1 }}>
-                                                                                Work 1
+                                                                                Work {num}
                                                                             </Typography>
-                                                                            {Object.values(repeater_fields)?.map((item, index) => {
+                                                                            {Object.values(repeater_fields)?.map((field, i) => {
+                                                                                const { title, required, validate } = field;
+                                                                                const keyValue = Object.keys(repeater_fields);
+
                                                                                 return (
-                                                                                    <Box key={index + 1}>
+                                                                                    <Box key={i + 1} sx={{ pt: 1 }}>
                                                                                         <Typography component="p" sx={{ fontSize: '14px', color: '#000' }}>
-                                                                                            Designation:
+                                                                                            {title}:
                                                                                         </Typography>
-                                                                                        <TextField fullWidth type={type} {...register(fieldNames[index], { required: "This field is required" })} error={Boolean(errors.user_name)} helperText={errors.user_name?.message} sx={{ width: "90%", mr: '12px', mb: "15px" }} />
+                                                                                        <TextField fullWidth type={field?.type} {...register(`fields.${inx}.${keyValue[i]}`, { required: "This field is required" })} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
+                                                                                        <ErrorMessages errors={errors}
+                                                                                            inputName={`fields.${inx}.${keyValue[i]}`} />
                                                                                     </Box>
                                                                                 )
                                                                             })
@@ -122,7 +153,7 @@ const GetForm = () => {
                                                                 )
                                                             })}
                                                             <Grid item xs={4}>
-                                                                <Box className="addMore" sx={{ border: '1px solid #707070', padding: '8px', cursor: 'pointer', height: '170px' }}>
+                                                                <Box onClick={() => setNumberOfWork(numberOfWork + 1)} className="addMore" sx={{ border: '1px solid #707070', padding: '8px', cursor: 'pointer', minHeight: "92%" }}>
                                                                     <Typography component="p" sx={{ fontSize: '15px' }}>
                                                                         Add More
                                                                     </Typography>
@@ -131,7 +162,10 @@ const GetForm = () => {
                                                         </Grid>
                                                     </Box>
                                                     :
-                                                    <TextField type={type} fullWidth {...register(fieldNames[index], { required: "This field is required" })} error={Boolean(errors.user_name)} helperText={errors.user_name?.message} />
+                                                    <Box sx={{ width: '100%' }}>
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`, { required: "This field is required" })} defaultValue={item?.default || ''} />
+                                                        <ErrorMessages errors={errors}  inputName={`${inputName}`} />
+                                                    </Box>
                                     }
                                 </Box> : ''
                             }
@@ -139,7 +173,7 @@ const GetForm = () => {
                     )
                 })}
                 <Box className="input-item" sx={{ pt: 2, pl: '7.5rem' }}>
-                    <Button disabled={disable} type="submit" value="submit_close" variant="contained" className={(disable ? "disable-color" : "")} sx={{ backgroundColor: "#5BBC2E !important", px: 3, py: .5, textTransform: 'none' }}>
+                    <Button disabled={disable} type="submit" value="submit_close" variant="contained" className={(disable ? "disable-color" : "")} sx={{ backgroundColor: "#5BBC2E !important", px: 3, py: .6, textTransform: 'none' }}>
                         {disable ? "Submitting" : "Submit"}
                     </Button>
                 </Box>

@@ -37,3 +37,6 @@
     /* height: 92%; */
     /* width: 30%; */
 }
+.formInfo .MuiOutlinedInput-root{
+    padding: 4px ;
+}

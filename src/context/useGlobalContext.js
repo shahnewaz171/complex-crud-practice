@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import SearchInputFields from '../components/TableInfo/SearchInputFields/SearchInputFields';
+import { ErrorMessage } from '@hookform/error-message';
 
 const UserContext = createContext();
 
@@ -44,20 +45,30 @@ export const UserProvider = ({ children }) => {
 
     const alertMessage = (value, isSuccess) => {
         toast.dismiss(toastId.current);
-        if(isSuccess){
+        if (isSuccess) {
             toast.success(value, {
                 theme: "light",
                 position: toast.POSITION.TOP_CENTER,
                 autoClose: 5000
             });
         }
-        else{
+        else {
             toast.error(value, {
                 theme: "light",
                 position: toast.POSITION.TOP_CENTER,
                 autoClose: 5000
             });
         }
+    };
+
+    const ErrorMessages = ({ errors, inputName }) => {
+        return (
+            <ErrorMessage
+                errors={errors}
+                name={`${inputName}`}
+                render={({ message }) => <p style={{ margin: 0, fontSize: "14px", color: "#d32f2f", whiteSpace: 'nowrap' }}>{message}</p>}
+            />
+        )
     }
 
     return (
@@ -67,7 +78,8 @@ export const UserProvider = ({ children }) => {
                 rowsData,
                 setRowsData,
                 isLoading,
-                alertMessage
+                alertMessage,
+                ErrorMessages
             }}
         >
             {children}
