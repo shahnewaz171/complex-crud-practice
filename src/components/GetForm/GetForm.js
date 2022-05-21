@@ -94,7 +94,6 @@ const GetForm = () => {
                     const lengthTitle = lengthInfo?.split(':')?.[0];
                     const lengthNumber = lengthInfo?.split(':')?.[1];
                     const patternType = validate?.split("|")?.filter((item) => !item.includes(":"));
-                    // console.log(item)
 
                     return (
                         <Box key={index + 1}>
@@ -204,8 +203,8 @@ const GetForm = () => {
                                                                 {
                                                                     required: required ? 'This field is required' : '',
                                                                     pattern: {
-                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : '',
-                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ''
+                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : ((patternType?.[0] === 'only_numbers' ) || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
+                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ((patternType?.[0] === 'only_numbers' ) || (patternType?.[0] === 'integer')) ? "Please input only numbers" : '' 
                                                                     }
                                                                 })} defaultValue={item?.default || ''}
                                                         />
