@@ -1,3 +1,9 @@
-.pointer{
-  cursor: pointer;
+.pointer {
+    cursor: pointer;
+}
+
+.disable-color {
+    color: #fff!important;
+    cursor: not-allowed !important;
+    pointer-events: unset !important;
 }

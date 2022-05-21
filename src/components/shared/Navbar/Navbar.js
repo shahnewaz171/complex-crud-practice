@@ -24,7 +24,7 @@ const Navbar = () => {
         <AppBar position="static" sx={{ bgcolor: '#fff', boxShadow: 'none', borderBottom: '1px solid #e7e4e4', px: { xs: 0, lg: 5 } }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <Box component="img" src="https://inside.xpeedstudio.com/wp-content/uploads/2019/10/logo_v2-185x48.png" sx={{ display: { xs: 'none', lg: 'block' } }} />
+                    {/* <Box component="img" src="https://inside.xpeedstudio.com/wp-content/uploads/2019/10/logo_v2-185x48.png" sx={{ display: { xs: 'none', lg: 'block' } }} /> */}
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
