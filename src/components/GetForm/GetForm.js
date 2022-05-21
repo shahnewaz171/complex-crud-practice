@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, FormControl, FormControlLabel, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, DialogContent, FormControl, FormControlLabel, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
 import { useFieldArray, useForm } from 'react-hook-form';
 import useGlobalContext from '../../context/useGlobalContext';
 import axios from 'axios';
@@ -12,24 +12,27 @@ const GetForm = () => {
     const [fieldNames, setFieldNames] = useState([]);
     const [disable, setDisable] = useState(false);
     const [numberOfWork, setNumberOfWork] = useState(0);
+    const [loading, setIsLoading] = useState(false);
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm({
         mode: "all",
         reValidateMode: 'onChange'
     });
 
     useEffect(() => {
+        setIsLoading(true);
         axios.get('http://localhost/api/get_form.php')
             .then(res => {
+                setIsLoading(false);
                 const { data } = res?.data;
                 if (data) {
                     const fieldsInfo = Object.values(data.fields[0]);
-                    // console.log(data.fields)
                     setFieldInfo(fieldsInfo);
                     const fieldName = Object.keys(data.fields[0]);
                     setFieldNames(fieldName);
                 }
             })
             .catch((err) => {
+                setIsLoading(false);
                 console.error(err);
             })
     }, []);
@@ -47,9 +50,15 @@ const GetForm = () => {
     const onSubmit = (data) => {
         setDisable(true);
         console.log(data);
-        axios.post('http://localhost/api/submit_form.php')
+        axios.get('http://localhost/api/submit_form.php', data, {
+            headers: {
+                Accept: "application/json",
+                "content-type": "application/json",
+            },
+        })
             .then(res => {
                 setTimeout(() => {
+                    console.log(res)
                     setDisable(false);
                     const { messages, status } = res.data;
                     if (status === 'success') {
@@ -60,7 +69,7 @@ const GetForm = () => {
                         setDisable(false);
                         alertMessage(messages?.join(', '), false);
                     }
-                },  2000);
+                }, 1);
             })
             .catch((err) => {
                 setDisable(false);
@@ -120,12 +129,12 @@ const GetForm = () => {
                                             :
                                             type === "radio" ?
                                                 <FormControl sx={{ pt: .2 }}>
-                                                    <RadioGroup  row  {...html_attr} className={item.html_attr?.class}  defaultValue={item?.default || ''} >
+                                                    <RadioGroup row  {...html_attr} className={item.html_attr?.class} defaultValue={item?.default || ''} >
                                                         {options?.map((option, i) => {
                                                             const { key, label } = option;
 
                                                             return (
-                                                                <FormControlLabel key={i + 1} {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} value={key} control={<Radio   />} label={label} sx={{ textTransform: 'none', ml: '0px' }} />
+                                                                <FormControlLabel key={i + 1} {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} value={key} control={<Radio />} label={label} sx={{ textTransform: 'none', ml: '0px' }} />
                                                             )
                                                         })}
                                                     </RadioGroup>
