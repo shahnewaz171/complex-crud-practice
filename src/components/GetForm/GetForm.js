@@ -11,14 +11,14 @@ const GetForm = () => {
     const [fieldNames, setFieldNames] = useState([]);
     const [disable, setDisable] = useState(false);
     const [value, setValue] = React.useState('false');
-    const [numberOfWork, setNumberOfWork] = useState(1);
+    const [numberOfWork, setNumberOfWork] = useState(0);
     const { register, handleSubmit, reset, formState: { errors }, control } = useForm({
         mode: "all",
         reValidateMode: 'onChange'
     });
 
     useEffect(() => {
-        axios.post('http://localhost/api/get_form.php')
+        axios.get('http://localhost/api/get_form.php')
             .then(res => {
                 const { data } = res?.data;
                 if (data) {
@@ -42,7 +42,6 @@ const GetForm = () => {
     for (let i = 1; i <= numberOfWork; i++) {
         rows.push(i);
     }
-    // console.log(rows)
 
     const onSubmit = (data) => {
         console.log(data);
@@ -52,45 +51,37 @@ const GetForm = () => {
     return (
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: { sm: '100%', lg: '60%' }, m: '2.5rem auto' }}>
             <Box className="formInfo" sx={{ mx: 5 }}>
-                <Typography component="h2" sx={{ mb: 2, fontSize: '24px', textAlign: 'center', fontWeight: 500 }}>
+                <Typography component="h2" sx={{ mb: 2, fontSize: '26px', textAlign: 'center', fontWeight: 500 }}>
                     Get Form
                 </Typography>
                 {fieldInfo?.map((item, index) => {
-                    const { title, type, required, value, validate, options, repeater_fields } = item;
+                    const { title, type, required, validate, options, repeater_fields } = item;
                     const { ...html_attr } = item.html_attr;
                     const inputName = fieldNames[index];
                     delete html_attr.class;
 
-                    const patterns = validate?.split("|");
-                    const patternType = patterns?.filter((item) => !item.includes(":"));
-                    const lengthSize = patterns?.filter((item) => item.includes(":"));
-                    console.log(patternType?.[0]);
-                    console.log(lengthSize?.[0]?.split(':'));
+                    const lengthInfo = validate?.split('|')[1];
+                    const lengthTitle = lengthInfo?.split(':')?.[0];
+                    const lengthNumber = lengthInfo?.split(':')?.[1];
+                    const patternType = validate?.split("|")?.filter((item) => !item.includes(":"));
 
                     return (
                         <Box key={index + 1}>
                             {type !== 'hidden' ?
                                 <Box className="input-item" sx={{ pt: 1, justifyContent: "unset !important" }}>
-                                    <Typography component="div" className="searchItem-title" sx={{ width: type === "radio" ? "16.6%" : type === 'repeater' ? '16.6%' : '20%' }} >
+                                    <Typography component="div" sx={{ width: type === "radio" ? "16.6%" : type === 'repeater' ? '16.6%' : '20%', fontSize: '18px' }} >
                                         {title}:
                                     </Typography>
                                     {type === 'select' ?
                                         <FormControl fullWidth>
-                                            <Controller
-                                                render={({ field }) => (
-                                                    <Select {...field} {...html_attr} className={item.html_attr?.class} >
-                                                        {options?.map((option, i) => {
-                                                            const { key, label } = option;
-                                                            return (
-                                                                <MenuItem key={i + 1} value={key}>{label}</MenuItem>
-                                                            )
-                                                        })}
-                                                    </Select>
-                                                )}
-                                                control={control}
-                                                defaultValue={item?.default || ''}
-                                                {...register(`${inputName}`,  required ?{ required: 'This field is required' } : '')}
-                                            />
+                                            <Select {...html_attr} className={item.html_attr?.class} {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} defaultValue={item?.default || ''} >
+                                                {options?.map((option, i) => {
+                                                    const { key, label } = option;
+                                                    return (
+                                                        <MenuItem key={i + 1} value={key}>{label}</MenuItem>
+                                                    )
+                                                })}
+                                            </Select>
                                             <ErrorMessages
                                                 errors={errors}
                                                 inputName={`${inputName}`}
@@ -99,9 +90,9 @@ const GetForm = () => {
                                         :
                                         type === 'textarea' ?
                                             <Box sx={{ width: '100%' }}>
-                                                <TextField {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`,  required ?{ required: 'This field is required' } : '')} defaultValue={item?.default || ''} />
+                                                <TextField {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} defaultValue={item?.default || ''} />
                                                 {required &&
-                                                     <ErrorMessages errors={errors} inputName={`${inputName}`} />
+                                                    <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                 }
                                             </Box>
                                             :
@@ -109,14 +100,18 @@ const GetForm = () => {
                                                 <FormControl sx={{ pt: .2 }}>
                                                     <Controller
                                                         render={({ field }) => (
-                                                            <RadioGroup row {...field} >
-                                                                <FormControlLabel value="true" control={<Radio />} label="Yes" sx={{ textTransform: 'none', ml: '0px' }} />
-                                                                <FormControlLabel value="false" control={<Radio />} label="No" sx={{ textTransform: 'none', ml: '0px' }} />
+                                                            <RadioGroup row {...field} {...html_attr} className={item.html_attr?.class} >
+                                                                {options?.map((option, i) => {
+                                                                    const { key, label } = option;
+                                                                    return (
+                                                                        <FormControlLabel key={i + 1} value={key} control={<Radio />} label={label} sx={{ textTransform: 'none', ml: '0px' }} />
+                                                                    )
+                                                                })}
                                                             </RadioGroup>
                                                         )}
                                                         control={control}
                                                         defaultValue={item?.default || ''}
-                                                        {...register(`${inputName}`,  required ?{ required: 'This field is required' } : '')}
+                                                        {...register(`${inputName}`, required ? { required: 'This field is required' } : '')}
                                                     />
                                                     <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                 </FormControl>
@@ -128,7 +123,7 @@ const GetForm = () => {
 
                                                                 return (
                                                                     <Grid key={inx + 1} item xs={4}>
-                                                                        <Box sx={{ border: '1px solid #707070', padding: '15px', minHeight: '180px' }}>
+                                                                        <Box sx={{ border: '1px solid #707070', padding: '15px', minHeight: '235px' }}>
                                                                             <Typography component="p" className="searchItem-title" sx={{ mb: 1 }}>
                                                                                 Work {num}
                                                                             </Typography>
@@ -137,11 +132,27 @@ const GetForm = () => {
                                                                                 const keyValue = Object.keys(repeater_fields);
 
                                                                                 return (
-                                                                                    <Box key={i + 1} sx={{ pt: 1 }}>
+                                                                                    <Box key={i + 1} {...html_attr} className={item.html_attr?.class} sx={{ pt: 1 }}>
                                                                                         <Typography component="p" sx={{ fontSize: '14px', color: '#000' }}>
                                                                                             {title}:
                                                                                         </Typography>
-                                                                                        <TextField fullWidth type={field?.type} {...register(`fields.${inx}.${keyValue[i]}`,  workReq ?{ required: 'This field is required' } : '')} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
+                                                                                        <TextField fullWidth type={field?.type} {...register(`fields.${inx}.${keyValue[i]}`,
+                                                                                            {
+                                                                                                required: workReq ? 'This field is required' : '',
+                                                                                                pattern: {
+                                                                                                    value: validate === 'only_letters' ? /^[A-Za-z]+$/ : validate === 'only_letter_number' ? /[^A-Za-z0-9]+/ : '',
+                                                                                                    message: validate === 'only_letters' ? 'Please input alphabet characters only' : validate === 'only_letter_number' ? 'Please input characters or numbers only' : ''
+
+                                                                                                },
+                                                                                                minLength: {
+                                                                                                    value: lengthTitle === 'min' ? lengthNumber : '',
+                                                                                                    message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
+                                                                                                },
+                                                                                                maxLength: {
+                                                                                                    value: lengthTitle === 'max' ? lengthNumber : '',
+                                                                                                    message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
+                                                                                                }
+                                                                                            })} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
                                                                                         <ErrorMessages errors={errors}
                                                                                             inputName={`fields.${inx}.${keyValue[i]}`} />
                                                                                     </Box>
@@ -153,9 +164,9 @@ const GetForm = () => {
                                                                 )
                                                             })}
                                                             <Grid item xs={4}>
-                                                                <Box onClick={() => setNumberOfWork(numberOfWork + 1)} className="addMore" sx={{ border: '1px solid #707070', padding: '8px', cursor: 'pointer', minHeight: "92%" }}>
+                                                                <Box onClick={() => setNumberOfWork(numberOfWork + 1)} className="addMore" sx={{ border: '1px solid #707070', padding: '8px', cursor: 'pointer', minHeight: "92%", '&:hover': { border: '1px dotted #000' } }}>
                                                                     <Typography component="p" sx={{ fontSize: '15px' }}>
-                                                                        Add More
+                                                                        {numberOfWork >= 1 ? 'Add More' : 'Add'}
                                                                     </Typography>
                                                                 </Box>
                                                             </Grid>
@@ -163,14 +174,16 @@ const GetForm = () => {
                                                     </Box>
                                                     :
                                                     <Box sx={{ width: '100%' }}>
-                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth 
-                                                        {...register(`${inputName}`, required ?{ required: 'This field is required' } : patternType == 'only_letters'  ? { pattern: { 
-                                                            value: /^[A-Za-z]+$/ ,
-                                                            message: 'Please input alphabet characters only'
-                                                         }} : patternType == 'only_letter_number'  ? { pattern: { 
-                                                            value: /[^A-Za-z0-9]+/ ,
-                                                            message: 'Please input characters or numbers only'
-                                                         }} : '')} defaultValue={item?.default || ''} />
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth
+                                                            {...register(`${inputName}`,
+                                                                {
+                                                                    required: required ? 'This field is required' : '',
+                                                                    pattern: {
+                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : '',
+                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ''
+                                                                    }
+                                                                })} defaultValue={item?.default || ''}
+                                                        />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                     </Box>
                                     }
@@ -179,7 +192,7 @@ const GetForm = () => {
                         </Box>
                     )
                 })}
-                <Box className="input-item" sx={{ pt: 2, pl: '7.5rem' }}>
+                <Box className="input-item" sx={{ pt: 4, pl: '7.5rem', }}>
                     <Button disabled={disable} type="submit" value="submit_close" variant="contained" className={(disable ? "disable-color" : "")} sx={{ backgroundColor: "#5BBC2E !important", px: 3, py: .6, textTransform: 'none' }}>
                         {disable ? "Submitting" : "Submit"}
                     </Button>

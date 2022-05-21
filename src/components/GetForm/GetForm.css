@@ -34,9 +34,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* height: 92%; */
-    /* width: 30%; */
 }
-.formInfo .MuiOutlinedInput-root{
-    padding: 4px ;
+
+.formInfo .MuiOutlinedInput-root {
+    padding: 4px;
+}
+
+.formInfo .MuiOutlinedInput-notchedOutline {
+    width: 100%;
 }
