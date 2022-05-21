@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Button, CircularProgress, Dialog, DialogContent, FormControl, FormControlLabel, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
 import { useFieldArray, useForm } from 'react-hook-form';
 import useGlobalContext from '../../context/useGlobalContext';
 import axios from 'axios';
 import './GetForm.css';
 import { ToastContainer } from 'react-toastify';
+import { useParams } from 'react-router-dom';
 
 const GetForm = () => {
+    const { id } = useParams();
     const { ErrorMessages, alertMessage } = useGlobalContext();
     const [fieldInfo, setFieldInfo] = useState([]);
     const [fieldNames, setFieldNames] = useState([]);
@@ -17,25 +19,41 @@ const GetForm = () => {
         mode: "all",
         reValidateMode: 'onChange'
     });
+    const urlRef = useRef( id ? `http://localhost/api/get_form.php?id=${id}` : `http://localhost/api/get_form.php`);
 
     useEffect(() => {
         setIsLoading(true);
-        axios.get('http://localhost/api/get_form.php')
+
+        if(urlRef?.current){
+            axios.get(`${urlRef.current}`)
             .then(res => {
                 setIsLoading(false);
                 const { data } = res?.data;
-                if (data) {
-                    const fieldsInfo = Object.values(data.fields[0]);
-                    setFieldInfo(fieldsInfo);
-                    const fieldName = Object.keys(data.fields[0]);
-                    setFieldNames(fieldName);
+                const fieldsInfo = Object.values(data.fields[0]);
+                setFieldInfo(fieldsInfo);
+                const fieldName = Object.keys(data.fields[0]);
+                setFieldNames(fieldName);
+
+                if(id && fieldsInfo){
+                   const workLength =  fieldsInfo.filter(item => {
+                        if(item === 'repeater'){
+                            return item.value;
+                        }
+                        return [];
+                    });
+                    setNumberOfWork(workLength?.length);
+                    // console.log(1)
+                    
                 }
             })
             .catch((err) => {
                 setIsLoading(false);
                 console.error(err);
             })
-    }, []);
+        }
+        console.log('my effect is running');
+        return () => console.log('my effect is destroying');
+    }, [id]);
 
     useFieldArray({
         control,
@@ -82,18 +100,22 @@ const GetForm = () => {
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: { sm: '100%', lg: '60%' }, m: '2.5rem auto' }}>
             <Box className="formInfo" sx={{ mx: 5 }}>
                 <Typography component="h2" sx={{ mb: 2, fontSize: '26px', textAlign: 'center', fontWeight: 500 }}>
-                    Get Form
+                    { id ? 'Update Data' : 'Get Form' }
                 </Typography>
                 {fieldInfo?.map((item, index) => {
-                    const { title, type, required, validate, options, repeater_fields } = item;
+                    const { title, type, required, validate, value, options, repeater_fields, readonly } = item;
                     const { ...html_attr } = item.html_attr;
                     const inputName = fieldNames[index];
                     delete html_attr.class;
+                    // console.log(item)
 
                     const lengthInfo = validate?.split('|')[1];
                     const lengthTitle = lengthInfo?.split(':')?.[0];
                     const lengthNumber = lengthInfo?.split(':')?.[1];
                     const patternType = validate?.split("|")?.filter((item) => !item.includes(":"));
+
+                    const workFields = id ? value : repeater_fields ? Object.values(repeater_fields) : [ ];
+                    // console.log(workFields);
 
                     return (
                         <Box key={index + 1}>
@@ -104,7 +126,7 @@ const GetForm = () => {
                                     </Typography>
                                     {type === 'select' ?
                                         <FormControl fullWidth>
-                                            <Select {...html_attr} className={item.html_attr?.class} {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} defaultValue={item?.default || ''} >
+                                            <Select {...html_attr} className={item.html_attr?.class} {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} defaultValue={value || item?.default || ''} >
                                                 {options?.map((option, i) => {
                                                     const { key, label } = option;
                                                     return (
@@ -120,7 +142,7 @@ const GetForm = () => {
                                         :
                                         type === 'textarea' ?
                                             <Box sx={{ width: '100%' }}>
-                                                <TextField {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} defaultValue={item?.default || ''} />
+                                                <TextField {...html_attr} className={item.html_attr?.class} fullWidth {...register(`${inputName}`, { required: required ? 'This field is required' : '' })} defaultValue={value || item?.default || ''} />
                                                 {required &&
                                                     <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                 }
@@ -128,7 +150,7 @@ const GetForm = () => {
                                             :
                                             type === "radio" ?
                                                 <FormControl sx={{ pt: .2 }}>
-                                                    <RadioGroup row  {...html_attr} className={item.html_attr?.class} defaultValue={item?.default || ''} >
+                                                    <RadioGroup row  {...html_attr} className={item.html_attr?.class} defaultValue={value || item?.default || ''} >
                                                         {options?.map((option, i) => {
                                                             const { key, label } = option;
 
@@ -151,8 +173,8 @@ const GetForm = () => {
                                                                             <Typography component="p" className="searchItem-title" sx={{ mb: 1 }}>
                                                                                 Work {num}
                                                                             </Typography>
-                                                                            {Object.values(repeater_fields)?.map((field, i) => {
-                                                                                const { title, required: workReq, validate } = field;
+                                                                            {workFields?.map((field, i) => {
+                                                                                const { title, required: workReq, validate, value: fieldValue } = field;
                                                                                 const keyValue = Object.keys(repeater_fields);
 
                                                                                 return (
@@ -176,7 +198,7 @@ const GetForm = () => {
                                                                                                     value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
                                                                                                     message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
                                                                                                 }
-                                                                                            })} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
+                                                                                            })} defaultValue={fieldValue} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
                                                                                         <ErrorMessages errors={errors}
                                                                                             inputName={`user_hobby.${inx}.${keyValue[i]}`} />
                                                                                     </Box>
@@ -206,7 +228,7 @@ const GetForm = () => {
                                                                         value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : ((patternType?.[0] === 'only_numbers' ) || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
                                                                         message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ((patternType?.[0] === 'only_numbers' ) || (patternType?.[0] === 'integer')) ? "Please input only numbers" : '' 
                                                                     }
-                                                                })} defaultValue={item?.default || ''}
+                                                                })} defaultValue={value || item?.default || '' } inputProps={{ readOnly: readonly || '' }}
                                                         />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                     </Box>

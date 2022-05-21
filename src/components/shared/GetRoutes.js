@@ -11,8 +11,8 @@ const GetRoutes = () => {
             element: <Outlet />,
             children: [
                 { index: true, element: <TableInfo /> },
-                { path: "create_data/:id", element: <GetForm /> },
-                { path: "update_form", element: <h1>Update form</h1> },
+                { path: "create_data", element: <GetForm /> },
+                { path: "update_data/:id", element: <GetForm /> },
             ],
         },
         { path: "*", element: <h1>Not found</h1> },

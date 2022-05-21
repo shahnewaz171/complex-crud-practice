@@ -133,7 +133,7 @@ const TableInfo = () => {
                                                                         return (
                                                                             <TableCell {...cell.getCellProps()} align="center">
                                                                                 {column.id === 'id' ?
-                                                                                    (<Typography onClick={() => navigate(`create_data/${row.original?.id}`)} component="span" sx={{ color: '#0969da', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
+                                                                                    (<Typography onClick={() => navigate(`update_data/${row.original?.id}`)} component="span" sx={{ color: '#0969da', cursor: 'pointer', textDecoration: 'underline' }}>{cell.render("Cell")}</Typography>)
                                                                                     :
                                                                                     (cell.render("Cell"))
                                                                                 }
