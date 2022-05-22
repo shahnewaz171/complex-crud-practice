@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useRoutes } from 'react-router-dom';
 import GetForm from '../GetForm/GetForm';
 import TableInfo from '../TableInfo/TableInfo';
+import NotFound from './NotFound/NotFound';
 
 const GetRoutes = () => {
 
@@ -15,7 +16,7 @@ const GetRoutes = () => {
                 { path: "update_data/:id", element: <GetForm /> },
             ],
         },
-        { path: "*", element: <h1>Not found</h1> },
+        { path: "*", element: <NotFound /> },
     ]);
 
     return element;

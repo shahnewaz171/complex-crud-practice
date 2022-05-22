@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material';
 import AdbIcon from '@mui/icons-material/Adb';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Link, useNavigate } from 'react-router-dom';
 
-const pages = ['Table', 'Get Form', 'Update Form'];
+const pages = [{ id: 1, page: 'Table', path: '/' }, { id: 2, page: 'Get Form', path: 'create_data' }, { id: 3, page: 'Update Form', path: '/' }];
 
 const Navbar = () => {
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
+    const navigate = useNavigate();
 
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
@@ -16,15 +18,16 @@ const Navbar = () => {
         setAnchorElUser(event.currentTarget);
     };
 
-    const handleCloseNavMenu = () => {
+    const handleCloseNavMenu = (path) => {
         setAnchorElNav(null);
+        navigate(path);
     };
 
     return (
         <AppBar position="static" sx={{ bgcolor: '#fff', boxShadow: 'none', borderBottom: '1px solid #e7e4e4', px: { xs: 0, lg: 5 } }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    {/* <Box component="img" src="https://inside.xpeedstudio.com/wp-content/uploads/2019/10/logo_v2-185x48.png" sx={{ display: { xs: 'none', lg: 'block' } }} /> */}
+                    <Box onClick={() => navigate('/')} component="img" src="https://inside.xpeedstudio.com/wp-content/uploads/2019/10/logo_v2-185x48.png" sx={{ display: { xs: 'none', lg: 'block', cursor: 'pointer' } }} />
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
@@ -55,23 +58,31 @@ const Navbar = () => {
                                 display: { xs: 'block', md: 'none' },
                             }}
                         >
-                            {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu} sx={{ color: '#000' }}>
-                                    <Typography textAlign="center">{page}</Typography>
-                                </MenuItem>
-                            ))}
+                            {pages.map((item) => {
+                                const { id, page, path } = item;
+                                return (
+                                    <Link key={id} to={path}>
+                                        <MenuItem onClick={handleCloseNavMenu} sx={{ color: '#000' }}>
+                                            <Typography textAlign="center">{page}</Typography>
+                                        </MenuItem>
+                                    </Link>
+                                )
+                            })}
                         </Menu>
                     </Box>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 3 }}>
-                        {pages.map((page) => (
-                            <Button
-                                key={page}
-                                onClick={handleCloseNavMenu}
-                                sx={{ my: 2, color: '#2a2929', display: 'block', mx: 1, textTransform: 'none', fontSize: '15px' }}
-                            >
-                                {page}
-                            </Button>
-                        ))}
+                    {pages.map((item) => {
+                                const { id, page, path } = item;
+                                return (
+                                    <Button
+                                    key={id}
+                                    onClick={() => handleCloseNavMenu(path)}
+                                    sx={{ my: 2, color: '#2a2929', display: 'block', mx: 1, textTransform: 'none', fontSize: '15px' }}
+                                >
+                                    {page}
+                                </Button>
+                                )
+                            })}
                     </Box>
 
                     <Box sx={{ flexGrow: 0 }}>
