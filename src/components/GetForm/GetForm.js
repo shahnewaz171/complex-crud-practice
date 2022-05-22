@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, DialogContent, FormControl, FormControlLabel, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, FormControl, FormControlLabel, Grid, MenuItem, Radio, RadioGroup, Select, TextField, Typography } from '@mui/material';
 import { useFieldArray, useForm } from 'react-hook-form';
 import useGlobalContext from '../../context/useGlobalContext';
-import axios from 'axios';
-import './GetForm.css';
 import { ToastContainer } from 'react-toastify';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import './GetForm.css';
 
 const GetForm = () => {
     const { id } = useParams();
@@ -19,41 +19,31 @@ const GetForm = () => {
         mode: "all",
         reValidateMode: 'onChange'
     });
-    const urlRef = useRef( id ? `http://localhost/api/get_form.php?id=${id}` : `http://localhost/api/get_form.php`);
+    const url = id ? `http://localhost/api/get_form.php?id=${id}` : `http://localhost/api/get_form.php`;
 
     useEffect(() => {
         setIsLoading(true);
-
-        if(urlRef?.current){
-            axios.get(`${urlRef.current}`)
-            .then(res => {
-                setIsLoading(false);
-                const { data } = res?.data;
-                const fieldsInfo = Object.values(data.fields[0]);
-                setFieldInfo(fieldsInfo);
-                const fieldName = Object.keys(data.fields[0]);
-                setFieldNames(fieldName);
-
-                if(id && fieldsInfo){
-                   const workLength =  fieldsInfo.filter(item => {
-                        if(item === 'repeater'){
-                            return item.value;
-                        }
-                        return [];
-                    });
-                    setNumberOfWork(workLength?.length);
-                    // console.log(1)
-                    
-                }
-            })
-            .catch((err) => {
-                setIsLoading(false);
-                console.error(err);
-            })
+        if (url) {
+            axios.get(`${url}`)
+                .then(res => {
+                    setIsLoading(false);
+                    const { data } = res?.data;
+                    const fieldsInfo = Object.values(data.fields[0]);
+                    setFieldInfo(fieldsInfo);
+                    const fieldName = Object.keys(data.fields[0]);
+                    setFieldNames(fieldName);
+                })
+                .catch((err) => {
+                    setIsLoading(false);
+                    console.error(err);
+                })
         }
-        console.log('my effect is running');
-        return () => console.log('my effect is destroying');
     }, [id]);
+
+    useFieldArray({
+        control,
+        name: "work",
+    });
 
     useFieldArray({
         control,
@@ -100,22 +90,18 @@ const GetForm = () => {
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: { sm: '100%', lg: '60%' }, m: '2.5rem auto' }}>
             <Box className="formInfo" sx={{ mx: 5 }}>
                 <Typography component="h2" sx={{ mb: 2, fontSize: '26px', textAlign: 'center', fontWeight: 500 }}>
-                    { id ? 'Update Data' : 'Get Form' }
+                    {id ? 'Update Data' : 'Get Form'}
                 </Typography>
                 {fieldInfo?.map((item, index) => {
                     const { title, type, required, validate, value, options, repeater_fields, readonly } = item;
                     const { ...html_attr } = item.html_attr;
                     const inputName = fieldNames[index];
-                    delete html_attr.class;
-                    // console.log(item)
-
                     const lengthInfo = validate?.split('|')[1];
                     const lengthTitle = lengthInfo?.split(':')?.[0];
                     const lengthNumber = lengthInfo?.split(':')?.[1];
                     const patternType = validate?.split("|")?.filter((item) => !item.includes(":"));
-
-                    const workFields = id ? value : repeater_fields ? Object.values(repeater_fields) : [ ];
-                    // console.log(workFields);
+                    delete html_attr.class;
+                    console.log(item)
 
                     return (
                         <Box key={index + 1}>
@@ -165,50 +151,95 @@ const GetForm = () => {
                                                 type === 'repeater' ?
                                                     <Box className="work-inputs">
                                                         <Grid container spacing={3}>
-                                                            {rows?.map((num, inx) => {
+                                                            {value ?
+                                                                value.map((val, inx) => {
+                                                                    return (
+                                                                        <Grid key={inx + 1} item xs={4}>
+                                                                            <Box sx={{ border: '1px solid #707070', padding: '15px', minHeight: '235px' }}>
+                                                                                <Typography component="p" className="searchItem-title" sx={{ mb: 1 }}>
+                                                                                    Work {inx + 1}
+                                                                                </Typography>
+                                                                                {Object.keys(repeater_fields).map((key, index) => {
+                                                                                    const { title, required: workReq, validate,  readonly: wReadonly, type  } = repeater_fields?.[key];
 
-                                                                return (
-                                                                    <Grid key={inx + 1} item xs={4}>
-                                                                        <Box sx={{ border: '1px solid #707070', padding: '15px', minHeight: '235px' }}>
-                                                                            <Typography component="p" className="searchItem-title" sx={{ mb: 1 }}>
-                                                                                Work {num}
-                                                                            </Typography>
-                                                                            {workFields?.map((field, i) => {
-                                                                                const { title, required: workReq, validate, value: fieldValue } = field;
-                                                                                const keyValue = Object.keys(repeater_fields);
+                                                                                    return (
+                                                                                        <Box key={index + 1} sx={{ pt: 1 }}>
+                                                                                            <Typography component="p" sx={{ fontSize: '14px', color: '#000', textTransform: 'capitalize' }}>
+                                                                                                {title}
+                                                                                            </Typography>
+                                                                                            <TextField {...html_attr} type={type} className={item.html_attr?.class} fullWidth  {...register(`work.${inx}.${key}`,
+                                                                                                {
+                                                                                                    required: workReq ? 'This field is required' : '',
+                                                                                                    pattern: {
+                                                                                                        value: validate === 'only_letters' ? /^[A-Za-z ]+$/ : validate === 'only_letter_number' ? /[^A-Za-z0-9]+/ : '',
+                                                                                                        message: validate === 'only_letters' ? 'Please input alphabet characters only' : validate === 'only_letter_number' ? 'Please input characters or numbers only' : ''
 
-                                                                                return (
-                                                                                    <Box key={i + 1} {...html_attr} className={item.html_attr?.class} sx={{ pt: 1 }}>
-                                                                                        <Typography component="p" sx={{ fontSize: '14px', color: '#000' }}>
-                                                                                            {title}:
-                                                                                        </Typography>
-                                                                                        <TextField fullWidth type={field?.type} {...register(`user_hobby.${inx}.${keyValue[i]}`,
-                                                                                            {
-                                                                                                required: workReq ? 'This field is required' : '',
-                                                                                                pattern: {
-                                                                                                    value: validate === 'only_letters' ? /^[A-Za-z ]+$/ : validate === 'only_letter_number' ? /[^A-Za-z0-9]+/ : '',
-                                                                                                    message: validate === 'only_letters' ? 'Please input alphabet characters only' : validate === 'only_letter_number' ? 'Please input characters or numbers only' : ''
+                                                                                                    },
+                                                                                                    minLength: {
+                                                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
+                                                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
+                                                                                                    },
+                                                                                                    maxLength: {
+                                                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
+                                                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
+                                                                                                    }
+                                                                                                })} defaultValue={value[inx]?.[key]} sx={{ width: "90%", mr: '12px', mt: "4px" }}  inputProps={{ readOnly: wReadonly || '' }} />
+                                                                                            <ErrorMessages errors={errors}
+                                                                                                inputName={`work.${inx}.${key}`} />
+                                                                                        </Box>
+                                                                                    )
+                                                                                })}
+                                                                            </Box>
+                                                                        </Grid>
+                                                                    )
+                                                                })
+                                                                : ''
+                                                            }
+                                                            {
+                                                                rows?.map((num, inx) => {
+                                                                    return (
+                                                                        <Grid key={inx + 1} item xs={4}>
+                                                                            <Box sx={{ border: '1px solid #707070', padding: '15px', minHeight: '235px' }}>
+                                                                                <Typography component="p" className="searchItem-title" sx={{ mb: 1 }}>
+                                                                                    Work {num}
+                                                                                </Typography>
+                                                                                {Object.values(repeater_fields)?.map((field, i) => {
+                                                                                    const { title, required: workReq, validate, value: fieldValue } = field;
+                                                                                    const keyValue = Object.keys(repeater_fields);
 
-                                                                                                },
-                                                                                                minLength: {
-                                                                                                    value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
-                                                                                                    message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
-                                                                                                },
-                                                                                                maxLength: {
-                                                                                                    value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
-                                                                                                    message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
-                                                                                                }
-                                                                                            })} defaultValue={fieldValue} sx={{ width: "90%", mr: '12px', mt: "4px" }} />
-                                                                                        <ErrorMessages errors={errors}
-                                                                                            inputName={`user_hobby.${inx}.${keyValue[i]}`} />
-                                                                                    </Box>
-                                                                                )
-                                                                            })
-                                                                            }
-                                                                        </Box>
-                                                                    </Grid>
-                                                                )
-                                                            })}
+                                                                                    return (
+                                                                                        <Box key={i + 1} sx={{ pt: 1 }}>
+                                                                                            <Typography component="p" sx={{ fontSize: '14px', color: '#000' }}>
+                                                                                                {title}:
+                                                                                            </Typography>
+                                                                                            <TextField {...html_attr} className={item.html_attr?.class} fullWidth type={field?.type} {...register(`user_hobby.${inx}.${keyValue[i]}`,
+                                                                                                {
+                                                                                                    required: workReq ? 'This field is required' : '',
+                                                                                                    pattern: {
+                                                                                                        value: validate === 'only_letters' ? /^[A-Za-z ]+$/ : validate === 'only_letter_number' ? /[^A-Za-z0-9]+/ : '',
+                                                                                                        message: validate === 'only_letters' ? 'Please input alphabet characters only' : validate === 'only_letter_number' ? 'Please input characters or numbers only' : ''
+
+                                                                                                    },
+                                                                                                    minLength: {
+                                                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
+                                                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
+                                                                                                    },
+                                                                                                    maxLength: {
+                                                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
+                                                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
+                                                                                                    }
+                                                                                                })} defaultValue={fieldValue} sx={{ width: "90%", mr: '12px', mt: "4px" }}  inputProps={{ readOnly: field?.readonly || '' }} />
+                                                                                            <ErrorMessages errors={errors}
+                                                                                                inputName={`user_hobby.${inx}.${keyValue[i]}`} />
+                                                                                        </Box>
+                                                                                    )
+                                                                                })
+                                                                                }
+                                                                            </Box>
+                                                                        </Grid>
+                                                                    )
+                                                                })
+                                                            }
                                                             <Grid item xs={4}>
                                                                 <Box onClick={() => setNumberOfWork(numberOfWork + 1)} className="addMore" sx={{ border: '1px solid #707070', padding: '8px', cursor: 'pointer', minHeight: "92%", '&:hover': { border: '1px dotted #000' } }}>
                                                                     <Typography component="p" sx={{ fontSize: '15px' }}>
@@ -219,16 +250,31 @@ const GetForm = () => {
                                                         </Grid>
                                                     </Box>
                                                     :
+                                                    type === 'email' ?
                                                     <Box sx={{ width: '100%' }}>
-                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth defaultValue={value || ''}
                                                             {...register(`${inputName}`,
                                                                 {
                                                                     required: required ? 'This field is required' : '',
                                                                     pattern: {
-                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : ((patternType?.[0] === 'only_numbers' ) || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
-                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ((patternType?.[0] === 'only_numbers' ) || (patternType?.[0] === 'integer')) ? "Please input only numbers" : '' 
+                                                                        value:  patternType?.[0] === 'email' ? /\S+@\S+\.\S+/  : '',
+                                                                        message:  patternType?.[0] === 'email' ? 'Please enter the valid email address' : ''
                                                                     }
-                                                                })} defaultValue={value || item?.default || '' } inputProps={{ readOnly: readonly || '' }}
+                                                                })} inputProps={{ readOnly: readonly || '' }}
+                                                        />
+                                                        <ErrorMessages errors={errors} inputName={`${inputName}`} />
+                                                    </Box> 
+                                                    :
+                                                    <Box sx={{ width: '100%' }}>
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth defaultValue={value || item?.default || ''}
+                                                            {...register(`${inputName}`,
+                                                                {
+                                                                    required: required ? 'This field is required' : '',
+                                                                    pattern: {
+                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
+                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? "Please input only numbers" : ''
+                                                                    }
+                                                                })} inputProps={{ readOnly: readonly || '' }}
                                                         />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                     </Box>
