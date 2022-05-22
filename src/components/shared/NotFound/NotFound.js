@@ -7,11 +7,11 @@ const NotFound = () => {
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        setTimeout(() => {
-            navigate(-1);
-        }, 3000)
-    }, [navigate]);
+    // useEffect(() => {
+    //     setTimeout(() => {
+    //         navigate(-1);
+    //     }, 3000)
+    // }, [navigate]);
 
     return (
         <>

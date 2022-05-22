@@ -4,7 +4,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate } from 'react-router-dom';
 
-const pages = [{ id: 1, page: 'All Data', path: '/' }, { id: 2, page: 'Get Form', path: 'create_data' }, { id: 3, page: 'Update Form', path: '/' }];
+const pages = [{ id: 1, page: 'All Data', path: '/' }, { id: 2, page: 'Get Form', path: 'create_data' }, { id: 3, page: 'Update Form', path: '/update_form' }];
 
 const Navbar = () => {
     const [anchorElNav, setAnchorElNav] = useState(null);
