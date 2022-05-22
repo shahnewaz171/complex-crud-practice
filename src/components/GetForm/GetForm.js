@@ -57,7 +57,6 @@ const GetForm = () => {
 
     const onSubmit = (data) => {
         setDisable(true);
-        console.log(data);
         axios.get('http://localhost/api/submit_form.php', data, {
             headers: {
                 Accept: "application/json",
@@ -66,25 +65,25 @@ const GetForm = () => {
         })
             .then(res => {
                 setTimeout(() => {
-                    console.log(res)
                     setDisable(false);
                     const { messages, status } = res.data;
                     if (status === 'success') {
                         alertMessage(messages?.join(', '), true);
-                        reset();
+                        if(!id){
+                            reset();
+                        }
                     }
                     else {
                         setDisable(false);
                         alertMessage(messages?.join(', '), false);
                     }
-                }, 1);
+                }, 1000);
             })
             .catch((err) => {
                 setDisable(false);
                 alertMessage('Something went wrong! Please try again later.', false);
             })
     }
-
 
     return (
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: { sm: '100%', lg: '60%' }, m: '2.5rem auto' }}>
@@ -98,9 +97,13 @@ const GetForm = () => {
                     const inputName = fieldNames[index];
                     const lengthInfo = validate?.split('|')[1];
                     const lengthTitle = lengthInfo?.split(':')?.[0];
-                    const lengthNumber = lengthInfo?.split(':')?.[1];
+                    let lengthNumber = lengthInfo?.split(':')?.[1];
                     const patternType = validate?.split("|")?.filter((item) => !item.includes(":"));
                     delete html_attr.class;
+                    
+                    if(lengthNumber){
+                        lengthNumber = parseInt(lengthNumber);
+                    }
 
                     return (
                         <Box key={index + 1}>
@@ -174,14 +177,14 @@ const GetForm = () => {
                                                                                                         message: validate === 'only_letters' ? 'Please input alphabet characters only' : validate === 'only_letter_number' ? 'Please input characters or numbers only' : ''
 
                                                                                                     },
-                                                                                                    minLength: {
-                                                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
-                                                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
-                                                                                                    },
-                                                                                                    maxLength: {
-                                                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
-                                                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
-                                                                                                    }
+                                                                                                    minLength: lengthTitle === 'min' ? {
+                                                                                                        value: lengthNumber,
+                                                                                                        message: `Please input at least ${lengthNumber} characters`
+                                                                                                    } : '',
+                                                                                                    maxLength: lengthTitle === 'max' ? {
+                                                                                                        value: lengthNumber,
+                                                                                                        message: `You cannot write more than ${lengthNumber} characters` 
+                                                                                                    } : ''
                                                                                                 })} defaultValue={value[inx]?.[key]} sx={{ width: "90%", mr: '12px', mt: "4px" }}  inputProps={{ readOnly: wReadonly || '' }} />
                                                                                             <ErrorMessages errors={errors}
                                                                                                 inputName={`work.${inx}.${key}`} />
@@ -219,14 +222,14 @@ const GetForm = () => {
                                                                                                         message: validate === 'only_letters' ? 'Please input alphabet characters only' : validate === 'only_letter_number' ? 'Please input characters or numbers only' : ''
 
                                                                                                     },
-                                                                                                    minLength: {
-                                                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
-                                                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
-                                                                                                    },
-                                                                                                    maxLength: {
-                                                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
-                                                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
-                                                                                                    }
+                                                                                                    minLength: lengthTitle === 'min' ? {
+                                                                                                        value: lengthNumber,
+                                                                                                        message: `Please input at least ${lengthNumber} characters`
+                                                                                                    } : '',
+                                                                                                    maxLength: lengthTitle === 'max' ? {
+                                                                                                        value: lengthNumber,
+                                                                                                        message: `You cannot write more than ${lengthNumber} characters` 
+                                                                                                    } : ''
                                                                                                 })} defaultValue={fieldValue} sx={{ width: "90%", mr: '12px', mt: "4px" }}  inputProps={{ readOnly: field?.readonly || '' }} />
                                                                                             <ErrorMessages errors={errors}
                                                                                                 inputName={`user_hobby.${inx}.${keyValue[i]}`} />
@@ -241,7 +244,7 @@ const GetForm = () => {
                                                             }
                                                             <Grid item xs={4}>
                                                                 <Box onClick={() => setNumberOfWork(numberOfWork + 1)} className="addMore" sx={{ border: '1px solid #707070', padding: '8px', cursor: 'pointer', minHeight: "92%", '&:hover': { border: '1px dotted #000' } }}>
-                                                                    <Typography component="p" sx={{ fontSize: '15px' }}>
+                                                                    <Typography component="p" sx={{ fontSize: '15px', color: 'green', fontWeight: 500}}>
                                                                         {numberOfWork >= 1 ? 'Add More' : 'Add'}
                                                                     </Typography>
                                                                 </Box>
@@ -258,14 +261,14 @@ const GetForm = () => {
                                                                         value:  patternType?.[0] === 'email' ? /\S+@\S+\.\S+/  : '',
                                                                         message:  patternType?.[0] === 'email' ? 'Please enter the valid email address' : ''
                                                                     },
-                                                                    minLength: {
-                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
-                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
-                                                                    },
-                                                                    maxLength: {
-                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
-                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
-                                                                    }
+                                                                    minLength: lengthTitle === 'min' ? {
+                                                                        value: lengthNumber,
+                                                                        message: `Please input at least ${lengthNumber} characters`
+                                                                    } : '',
+                                                                    maxLength: lengthTitle === 'max' ? {
+                                                                        value: lengthNumber,
+                                                                        message: `You cannot write more than ${lengthNumber} characters` 
+                                                                    } : ''
                                                                 })} defaultValue={value || ''} inputProps={{ readOnly: readonly || '' }}
                                                         />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
@@ -280,15 +283,15 @@ const GetForm = () => {
                                                                         value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ :  ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
                                                                         message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? "Please input only numbers" : ''
                                                                     },
-                                                                    minLength: {
-                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
-                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
-                                                                    },
-                                                                    maxLength: {
-                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
-                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
-                                                                    }
-                                                                })} defaultValue={value || item?.default || ''} inputProps={{ readOnly: readonly || '' }}
+                                                                    minLength: lengthTitle === 'min' ? {
+                                                                        value: lengthNumber,
+                                                                        message: `Please input at least ${lengthNumber} characters`
+                                                                    } : '',
+                                                                    maxLength: lengthTitle === 'max' ? {
+                                                                        value: lengthNumber,
+                                                                        message: `You cannot write more than ${lengthNumber} characters` 
+                                                                    } : ''
+                                                                })} defaultValue={value || ''} inputProps={{ readOnly: readonly || '' }}
                                                         />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                     </Box> : ''
