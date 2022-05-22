@@ -58,7 +58,7 @@ const TableInfo = () => {
     return (
         <>
             <Box sx={{ m: 5 }}>
-                <Typography component="h3" sx={{ fontWeight: 500, fontSize: '26px', textAlign: 'center', mb: 4 }}>Table List</Typography>
+                <Typography component="h3" sx={{ fontWeight: 500, fontSize: '26px', textAlign: 'center', mb: 4 }}>All Information</Typography>
                 <Box>
                     {/* Table List */}
                     <TableContainer {...getTableProps()} component={Paper} className="tableList" elevation={3} sx={{ minHeight: '43vh' }}>

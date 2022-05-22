@@ -38,7 +38,7 @@ const GetForm = () => {
                     console.error(err);
                 })
         }
-    }, [id]);
+    }, [url]);
 
     useFieldArray({
         control,
@@ -101,7 +101,6 @@ const GetForm = () => {
                     const lengthNumber = lengthInfo?.split(':')?.[1];
                     const patternType = validate?.split("|")?.filter((item) => !item.includes(":"));
                     delete html_attr.class;
-                    console.log(item)
 
                     return (
                         <Box key={index + 1}>
@@ -252,32 +251,47 @@ const GetForm = () => {
                                                     :
                                                     type === 'email' ?
                                                     <Box sx={{ width: '100%' }}>
-                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth defaultValue={value || ''}
-                                                            {...register(`${inputName}`,
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth   {...register(`${inputName}`,
                                                                 {
                                                                     required: required ? 'This field is required' : '',
                                                                     pattern: {
                                                                         value:  patternType?.[0] === 'email' ? /\S+@\S+\.\S+/  : '',
                                                                         message:  patternType?.[0] === 'email' ? 'Please enter the valid email address' : ''
+                                                                    },
+                                                                    minLength: {
+                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
+                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
+                                                                    },
+                                                                    maxLength: {
+                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
+                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
                                                                     }
-                                                                })} inputProps={{ readOnly: readonly || '' }}
+                                                                })} defaultValue={value || ''} inputProps={{ readOnly: readonly || '' }}
                                                         />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
                                                     </Box> 
                                                     :
+                                                    type !== 'email' ?
                                                     <Box sx={{ width: '100%' }}>
-                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth defaultValue={value || item?.default || ''}
-                                                            {...register(`${inputName}`,
+                                                        <TextField type={type} {...html_attr} className={item.html_attr?.class} fullWidth  {...register(`${inputName}`,
                                                                 {
                                                                     required: required ? 'This field is required' : '',
                                                                     pattern: {
-                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ : patternType?.[0] === 'email' ? /\S+@\S+\.\S+/ : ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
-                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : patternType?.[0] === 'email' ? 'Please enter the valid email address' : ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? "Please input only numbers" : ''
+                                                                        value: patternType?.[0] === 'only_letters' ? /^[A-Za-z ]+$/ :  ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? /^[0-9]+$/ : '',
+                                                                        message: patternType?.[0] === 'only_letters' ? 'Please input alphabet characters only' : ((patternType?.[0] === 'only_numbers') || (patternType?.[0] === 'integer')) ? "Please input only numbers" : ''
+                                                                    },
+                                                                    minLength: {
+                                                                        value: lengthTitle === 'min' ? parseInt(lengthNumber) : '',
+                                                                        message: lengthTitle === 'min' ? `Please input at least ${lengthNumber} characters` : ''
+                                                                    },
+                                                                    maxLength: {
+                                                                        value: lengthTitle === 'max' ? parseInt(lengthNumber) : '',
+                                                                        message: lengthTitle === 'max' ? `You cannot write more than ${lengthNumber} characters` : ''
                                                                     }
-                                                                })} inputProps={{ readOnly: readonly || '' }}
+                                                                })} defaultValue={value || item?.default || ''} inputProps={{ readOnly: readonly || '' }}
                                                         />
                                                         <ErrorMessages errors={errors} inputName={`${inputName}`} />
-                                                    </Box>
+                                                    </Box> : ''
                                     }
                                 </Box> : ''
                             }
